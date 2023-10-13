@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MongoDb.DatabaseContext.MongoDbContext;
 using MongoDb.Models;
-using MongoDb.Services;
 
 namespace MongoDb.Controllers
 {
@@ -15,52 +15,56 @@ namespace MongoDb.Controllers
         {
             _mongoDbContext = mongoDbContext;
         }
-        // GET: api/<StudentController>
+        // GET: api/<MovieController>
         [HttpGet]
-        public ActionResult<List<Movie>> Get()
+        public async Task<List<Movie>> Get()
         {
-            return _mongoDbContext.Movies.ToList();
+            return await _mongoDbContext.Movies
+                                        .AsNoTracking()
+                                        .ToListAsync();
         }
 
-        // GET api/<StudentController>/5
+        // GET api/<MovieController>/Guid
         [HttpGet("{id}")]
-        public ActionResult<Movie?> Get(Guid id)
+        public async Task<Movie> Get(Guid id)
         {
-            return _mongoDbContext.Movies.FirstOrDefault(x => x.Id == id);
+            return await _mongoDbContext.Movies
+                                        .AsNoTracking()
+                                        .FirstAsync(x => x.Id == id);
         }
 
-        // POST api/<StudentController>
+        // POST api/<MovieController>
         [HttpPost]
-        public ActionResult Post([FromBody] Movie movie)
+        public async Task<ActionResult> Post([FromBody] Movie movie)
         {
             _mongoDbContext.Movies.Add(movie);
-            _mongoDbContext.SaveChangesAsync();
+            await _mongoDbContext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie);
         }
 
-        // PUT api/<StudentController>/5
+        // PUT api/<MovieController>/Guid
         [HttpPut("{id}")]
-        public ActionResult Put(Guid id, [FromBody] Movie movie)
+        public async Task<ActionResult> Put(Guid id, [FromBody] Movie movie)
         {
-            var entity = _mongoDbContext.Movies.FirstOrDefault(x => x.Id == id);
+            var entity = await _mongoDbContext.Movies.FirstOrDefaultAsync(x => x.Id == id);
             entity.Name = movie.Name;
             entity.PublishDate = movie.PublishDate;
             _mongoDbContext.Movies.Update(entity);
-            _mongoDbContext.SaveChangesAsync();
+            await _mongoDbContext.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // DELETE api/<StudentController>/5
+        // DELETE api/<MovieController>/Guid
         [HttpDelete("{id}")]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult<bool>> Delete(Guid id)
         {
-            var movie = _mongoDbContext.Movies.Where(x => x.Id == id).FirstOrDefault();
+            var movie = await _mongoDbContext.Movies.Where(x => x.Id == id).FirstOrDefaultAsync();
 
             _mongoDbContext.Movies.Remove(movie);
-            _mongoDbContext.SaveChanges();
-            return Ok();
+            var success = await _mongoDbContext.SaveChangesAsync();
+            return Ok(success);
         }
 
     }
