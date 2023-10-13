@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MongoDb.DatabaseContext;
+using MongoDb.DatabaseContext.MongoDbContext;
 using MongoDb.Services;
 using MongoDB.Driver;
 
@@ -12,6 +15,9 @@ builder.Services.Configure<StudentStoreDatabaseSettings>(
 builder.Services.AddSingleton<IStudentStoreDatabaseSettings>(s => s.GetRequiredService<IOptions<StudentStoreDatabaseSettings>>().Value);
 
 builder.Services.AddSingleton<IMongoClient>(s => new MongoClient(builder.Configuration.GetValue<string>("StudentStoreDatabaseSettings:ConnectionString")));
+
+builder.Services.AddDbContext<MongoDbContext>(options => options.
+       UseMongoDB("mongodb://localhost:27017", "TestDb"));
 
 builder.Services.AddScoped<IStudentService,StudentService>();
 

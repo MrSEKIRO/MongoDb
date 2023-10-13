@@ -1,4 +1,5 @@
-﻿using MongoDb.DatabaseContext;
+﻿using Ardalis.Specification;
+using MongoDb.DatabaseContext;
 using MongoDb.Models;
 using MongoDB.Driver;
 
@@ -49,4 +50,12 @@ public class StudentService : IStudentService
 	{
 		_students.ReplaceOne(x => x.Id == student.Id, student);
 	}
+}
+
+public class StudentGetByIdSpecification : Specification<Student>
+{
+    public StudentGetByIdSpecification(string id)
+    {
+        Query.Where(x => x.Id == id);
+    }
 }
